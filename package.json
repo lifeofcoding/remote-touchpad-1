@@ -1,0 +1,15 @@
+{
+  "name": "remote-touchpad",
+  "version": "0.1.0",
+  "description": "A tool that lets you control your computer's mouse with a phone.",
+  "main": "backend/index.js",
+  "author": "cyd3r",
+  "license": "MIT",
+  "scripts": {
+    "start": "node backend/index.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "robotjs": "^0.5.1"
+  }
+}
