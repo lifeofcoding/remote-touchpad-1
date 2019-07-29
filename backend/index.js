@@ -4,15 +4,20 @@ const robot = require('robotjs')
 const open = require('open')
 const qr = require('qrcode')
 
+function acceleratedDelta(body, sensitivity) {
+    return {
+        x: Math.sign(body.deltaX) * Math.ceil(body.deltaX * sensitivity * body.velocityX),
+        y: Math.sign(body.deltaY) * Math.ceil(body.deltaY * sensitivity * body.velocityY),
+    }
+}
+
 const app = express()
 const port = 3000
 
 app.set('views', './frontend')
 app.set('view engine', 'pug')
 
-app.use(express.urlencoded({
-    extended: true,
-}))
+app.use(express.json())
 
 app.use('/', express.static('frontend'))
 
@@ -44,23 +49,21 @@ app.get('/qr', (req, res) => {
 })
 
 app.post('/click', (req, res) => {
-    res.send(`Got click on button ${req.body.button}`)
+    res.sendStatus(200)
     robot.mouseClick(req.body.button)
 })
 
 app.post('/move', (req, res) => {
-    res.send(`Move in ${req.body.deltaX}, ${req.body.deltaY} direction`)
-    const delta = {
-        x: parseInt(req.body.deltaX),
-        y: parseInt(req.body.deltaY),
-    }
+    res.sendStatus(200)
     const mousePos = robot.getMousePos()
-    robot.moveMouse(mousePos.x + delta.x, mousePos.y + delta.y)
+    const move = acceleratedDelta(req.body, 2.0)
+    robot.moveMouse(mousePos.x + move.x, mousePos.y + move.y)
 })
 
 app.post('/scroll', (req, res) => {
-    res.send(`Scroll in ${req.body.deltaX}, ${req.body.deltaY} direction`)
-    robot.scrollMouse(parseInt(req.body.deltaX), parseInt(req.body.deltaY))
+    res.sendStatus(200)
+    const move = acceleratedDelta(req.body, 2.0)
+    robot.scrollMouse(move.x, move.y)
 })
 
 app.listen(port, () => {

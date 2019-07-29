@@ -7,6 +7,8 @@ hammertime.add(new Hammer.Pan({ event: 'scroll', pointers: 2 }))
 let lastCenter;
 let lastScroll;
 
+const jsonContent = { 'Content-Type': 'application/json '}
+
 hammertime.on('panstart', (ev) => {
     lastCenter = ev.center
 })
@@ -17,23 +19,30 @@ hammertime.on('pan', (ev) => {
     lastCenter = ev.center
     fetch('/move', {
         method: 'POST',
-        body: new URLSearchParams(`deltaX=${deltaX}&deltaY=${deltaY}`)
+        headers: jsonContent,
+        body: JSON.stringify({
+            deltaX,
+            deltaY,
+            velocity: ev.velocity,
+            velocityX: ev.velocityX,
+            velocityY: ev.velocityY,
+        }),
     })
 })
 
 hammertime.on('tap', () => {
-    const params = new URLSearchParams('button=left')
     fetch('/click', {
         method: 'POST',
-        body: params,
+        headers: jsonContent,
+        body: JSON.stringify({button: 'left'}),
     })
 })
 
 hammertime.on('twotap', () => {
-    const params = new URLSearchParams('button=right')
     fetch('/click', {
         method: 'POST',
-        body: params,
+        headers: jsonContent,
+        body: JSON.stringify({button: 'right'}),
     })
 })
 
@@ -47,6 +56,10 @@ hammertime.on('scroll', (ev) => {
     lastScroll = ev.center
     fetch('/scroll', {
         method: 'POST',
-        body: new URLSearchParams(`deltaX=${deltaX}&deltaY=${deltaY}`)
+        headers: jsonContent,
+        body: JSON.stringify({
+            deltaX,
+            deltaY
+        }),
     })
 })
