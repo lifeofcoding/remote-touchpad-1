@@ -28,8 +28,6 @@ A web server will listen to port 3000 and will serve a web page to control your 
 
 ## API
 
-TODO: Authenticate
-
 ### POST `/drag`
 
 - deltaX: number
@@ -37,9 +35,16 @@ TODO: Authenticate
 
 ### POST `/click`
 
-- button: id
+- button: string
 
 ### POST `/scroll`
 
 - deltaX: number
 - deltaY: number
+
+## TODO
+
+- authentification
+- use touchpad velocity as in a real mouse
+- performance improvements
+- show ping
