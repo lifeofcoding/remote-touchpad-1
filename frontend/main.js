@@ -15,7 +15,7 @@ hammertime.on('pan', (ev) => {
     const deltaX = ev.center.x - lastCenter.x
     const deltaY = ev.center.y - lastCenter.y
     lastCenter = ev.center
-    fetch('/drag', {
+    fetch('/move', {
         method: 'POST',
         body: new URLSearchParams(`deltaX=${deltaX}&deltaY=${deltaY}`)
     })

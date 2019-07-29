@@ -48,8 +48,8 @@ app.post('/click', (req, res) => {
     robot.mouseClick(req.body.button)
 })
 
-app.post('/drag', (req, res) => {
-    res.send(`Drag in ${req.body.deltaX}, ${req.body.deltaY} direction`)
+app.post('/move', (req, res) => {
+    res.send(`Move in ${req.body.deltaX}, ${req.body.deltaY} direction`)
     const delta = {
         x: parseInt(req.body.deltaX),
         y: parseInt(req.body.deltaY),

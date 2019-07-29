@@ -28,7 +28,7 @@ A web server will listen to port 3000 and will serve a web page to control your 
 
 ## API
 
-### POST `/drag`
+### POST `/move`
 
 - deltaX: number
 - deltaY: number
