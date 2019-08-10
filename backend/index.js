@@ -1,8 +1,10 @@
-const os = require('os');
-const express = require('express')
+// this is file contains the main functionality of the remote touchpad
+// you can connect with any WebSocket library and control the mouse
+
 const robot = require('robotjs')
-const open = require('open')
-const qr = require('qrcode')
+const WebSocket = require('ws')
+
+const startFrontendServer = require('./serve_frontend')
 
 function acceleratedDelta(body, sensitivity) {
     return {
@@ -11,63 +13,22 @@ function acceleratedDelta(body, sensitivity) {
     }
 }
 
-const app = express()
-const port = 3000
+const wss = new WebSocket.Server({ port: 8080 })
 
-app.set('views', './frontend')
-app.set('view engine', 'pug')
-
-app.use(express.json())
-
-app.use('/', express.static('frontend'))
-
-app.get('/qr', (req, res) => {
-    // what's my ip
-    // inspired by https://stackoverflow.com/a/8440736
-    const addresses = Object.values(os.networkInterfaces()).reduce((prev, ifaces) => {
-        const ifAddresses = ifaces
-        .map((iface) => {
-            if ('IPv4' !== iface.family || iface.internal !== false) {
-            // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
-            return undefined
-            }
-            return iface.address
-        })
-        .filter(v => v !== undefined)
-        return [...prev, ...ifAddresses]
-    }, []);
-    if (addresses.length > 1) {
-        console.warn('Not tested')
-    }
-    qr.toDataURL(`http://${addresses[0]}:${port}`)
-        .then(url => res.render('qr', {
-            port,
-            address: addresses[0],
-            qr: url,
-        }))
-        .catch(err => console.error(err))
+wss.on('connection', (ws) => {
+    ws.on('message', (message) => {
+        const data = JSON.parse(message)
+        if (data.type === 'click') {
+            robot.mouseClick(data.button)
+        } else if (data.type === 'move') {
+            const mousePos = robot.getMousePos()
+            const move = acceleratedDelta(data, 2.0)
+            robot.moveMouse(mousePos.x + move.x, mousePos.y + move.y)
+        } else if (data.type === 'scroll') {
+            const move = acceleratedDelta(data, 2.0)
+            robot.scrollMouse(move.x, move.y)
+        }
+    })
 })
 
-app.post('/click', (req, res) => {
-    res.sendStatus(200)
-    robot.mouseClick(req.body.button)
-})
-
-app.post('/move', (req, res) => {
-    res.sendStatus(200)
-    const mousePos = robot.getMousePos()
-    const move = acceleratedDelta(req.body, 2.0)
-    robot.moveMouse(mousePos.x + move.x, mousePos.y + move.y)
-})
-
-app.post('/scroll', (req, res) => {
-    res.sendStatus(200)
-    const move = acceleratedDelta(req.body, 2.0)
-    robot.scrollMouse(move.x, move.y)
-})
-
-app.listen(port, () => {
-    console.log(`Listening on port ${port}`)
-    // open a web page with instructions on how to use the software
-    open(`http://localhost:${port}/qr`)
-})
+startFrontendServer()
